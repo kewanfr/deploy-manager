@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Deploy Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="sidebar">
+    <h2>Machines / Projets</h2>
+    <ul id="machine-list"></ul>
+    <button onclick="showCreateForm()">+ Nouveau projet</button>
+  </div>
+  <div id="main">
+    <h1 id="title">Sélectionnez un projet</h1>
+    <!-- Create Form -->
+    <div id="create-form" style="display:none;">
+      <h2>Créer un nouveau projet</h2>
+      <label>Machine:</label>
+      <select id="cf-machine"></select>
+      <label>Nom du projet:</label>
+      <input id="cf-name">
+      <label>Chemin:</label>
+      <input id="cf-path">
+      <label>Type:</label>
+      <select id="cf-type"><option value="docker">Docker</option><option value="classic">Classique</option></select>
+      <label>Commandes (une par ligne):</label>
+      <textarea id="cf-commands" rows="3"></textarea>
+      <label>Version:</label>
+      <input id="cf-version" value="1.0.0">
+      <label>HTTPS:</label>
+      <select id="cf-https"><option value="true">Oui</option><option value="false">Non</option></select>
+      <label>Repo Git (URL):</label>
+      <input id="cf-repo" placeholder="https://github.com/user/repo.git">
+      <label><input type="checkbox" id="cf-autoClone"> Cloner automatiquement si non présent</label>
+      <button onclick="createProject()">Créer</button>
+      <button onclick="hideCreateForm()">Annuler</button>
+    </div>
+    <!-- Details Form -->
+    <div id="project-details" style="display:none;">
+      <h2>Détails du projet</h2>
+      <label>Machine:</label><p id="pd-machine"></p>
+      <label>Nom:</label><p id="pd-name"></p>
+      <label>Version:</label><input id="pd-version">
+      <label>HTTPS:</label><select id="pd-https"><option value="true">Oui</option><option value="false">Non</option></select>
+      <label>Type:</label><p id="pd-type"></p>
+      <label>Chemin:</label><p id="pd-path"></p>
+      <label>Commandes:</label><textarea id="pd-commands" rows="4"></textarea>
+      <label>Repo Git:</label><input id="pd-repo">
+      <label><input type="checkbox" id="pd-autoClone"> Cloner automatiquement</label>
+      <button onclick="saveProject()">Enregistrer</button>
+      <button onclick="deployProject()">Déployer</button>
+      <h3>Retour:</h3><pre id="pd-output"></pre>
+    </div>
+  </div>
+<script>
+  let config;
+  async function loadConfig() {
+    config = await (await fetch('/api/config')).json();
+    const ml = document.getElementById('machine-list'); ml.innerHTML = '';
+    for (const m of Object.keys(config.machines)) {
+      const li = document.createElement('li'); li.textContent = m;
+      li.onclick = () => showProjects(m); ml.appendChild(li);
+    }
+    // Populate CF machine
+    const cfSel = document.getElementById('cf-machine'); cfSel.innerHTML = '';
+    Object.keys(config.machines).forEach(m => cfSel.append(new Option(m,m)));
+  }
+  function showProjects(machine) {
+    hideCreateForm(); document.getElementById('project-details').style.display='none';
+    const ml = document.getElementById('machine-list'); ml.innerHTML='';
+    ml.appendChild(Object.assign(document.createElement('h2'),{textContent:machine}));
+    const ul=document.createElement('ul'); ul.style.listStyle='none';
+    Object.keys(config.machines[machine].projects).forEach(p=>{
+      const li=document.createElement('li'); li.textContent=p;
+      li.onclick=()=>loadProject(machine,p); ul.appendChild(li);
+    }); ml.appendChild(ul); ml.appendChild(document.querySelector('#sidebar button'));
+  }
+  function loadProject(machine, project) {
+    const proj=config.machines[machine].projects[project];
+    document.getElementById('title').textContent=`${project} @ ${machine}`;
+    document.getElementById('pd-machine').textContent=machine;
+    document.getElementById('pd-name').textContent=project;
+    document.getElementById('pd-version').value=proj.version||'';
+    document.getElementById('pd-https').value=proj.https;
+    document.getElementById('pd-type').textContent=proj.type;
+    document.getElementById('pd-path').textContent=proj.path;
+    document.getElementById('pd-commands').value=(proj.commands||[]).join('\n');
+    document.getElementById('pd-repo').value=proj.repo||'';
+    document.getElementById('pd-autoClone').checked=proj.autoClone||false;
+    document.getElementById('project-details').style.display='block';
+  }
+  function showCreateForm(){ document.getElementById('create-form').style.display='block'; document.getElementById('project-details').style.display='none'; document.getElementById('title').textContent='Nouveau projet'; }
+  function hideCreateForm(){ document.getElementById('create-form').style.display='none'; document.getElementById('title').textContent='Sélectionnez un projet'; }
+  async function createProject(){
+    const machine=document.getElementById('cf-machine').value;
+    const project=document.getElementById('cf-name').value.trim();
+    const projectData={
+      path:document.getElementById('cf-path').value,
+      type:document.getElementById('cf-type').value,
+      commands:document.getElementById('cf-commands').value.split(/\r?\n/).filter(Boolean),
+      version:document.getElementById('cf-version').value,
+      https:document.getElementById('cf-https').value==='true',
+      repo:document.getElementById('cf-repo').value.trim(),
+      autoClone:document.getElementById('cf-autoClone').checked
+    };
+    const res=await fetch('/api/project/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({machine,project,projectData})});
+    if(res.ok){alert('Projet créé'); loadConfig();}else{alert('Erreur: '+await res.text());}
+  }
+  async function saveProject(){
+    const machine=document.getElementById('pd-machine').textContent;
+    const project=document.getElementById('pd-name').textContent;
+    const data={
+      version:document.getElementById('pd-version').value,
+      https:document.getElementById('pd-https').value==='true',
+      commands:document.getElementById('pd-commands').value.split(/\r?\n/).filter(Boolean),
+      repo:document.getElementById('pd-repo').value.trim(),
+      autoClone:document.getElementById('pd-autoClone').checked
+    };
+    await fetch('/api/project/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({machine,project,data})});
+    config.machines[machine].projects[project]={...config.machines[machine].projects[project],...data};
+    alert('Enregistré');
+  }
+  async function deployProject(){
+    const machine=document.getElementById('pd-machine').textContent;
+    const project=document.getElementById('pd-name').textContent;
+    const res=await fetch('/api/deploy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({machine,project})});
+    document.getElementById('pd-output').textContent=await res.text();
+  }
+  loadConfig();
+</script>
+</body>
+</html>

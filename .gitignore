@@ -4,3 +4,5 @@ node_modules/
 
 old/
 .vscode
+
+config/machines.json
