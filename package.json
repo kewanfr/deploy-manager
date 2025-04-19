@@ -1,0 +1,17 @@
+{
+  "name": "deploy-manager",
+  "version": "1.0.0",
+  "description": "A simple project to help me track my projets deployed on my machines, and auto deploy with my pipeline",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node web/server.js"
+  },
+  "author": "kewanfr",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.8.4",
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0"
+  }
+}
