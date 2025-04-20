@@ -4,7 +4,8 @@ const path = require("path");
 const configPath = path.join(__dirname, "../config/machines.json");
 const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
-const noHostAuthenticityCheck = "-o StrictHostKeyChecking=no";
+const noHostAuthenticityCheck = "";
+// const noHostAuthenticityCheck = "-o StrictHostKeyChecking=no";
 
 const [, , target, project] = process.argv;
 if (!target || !project) {
@@ -22,6 +23,8 @@ if (!proj) {
   process.exit(1);
 }
 
+console.log(`Deploying project '${project}' on machine '${target}'...`);
+
 // If autoClone and first deploy, clone repo if path doesn't exist
 if (proj.autoClone && proj.repo) {
   const pathBeforeProject = proj.path.split("/").slice(0, -1).join("/");
@@ -37,7 +40,7 @@ if (proj.autoClone && proj.repo) {
 const sshBase = `ssh ${noHostAuthenticityCheck} -p ${machine.port} ${machine.user}@${machine.host}`;
 let cmd = `cd ${proj.path} && git pull`;
 if (proj.type === "docker") {
-  cmd += " && docker-compose up -d --build";
+  cmd += " && docker compose up -d --build";
 } else {
   if (proj.commands && proj.commands.length) {
     cmd += " && " + proj.commands.join(" && ");

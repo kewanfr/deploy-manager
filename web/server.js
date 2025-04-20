@@ -3,12 +3,11 @@ const fs = require("fs");
 const path = require("path");
 const bodyParser = require("body-parser");
 const { exec } = require("child_process");
-const pangolin = require("../utils/pangolin");
 const configPath = path.join(__dirname, "../config/machines.json");
 let config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
 const app = express();
-const PORT = 3000;
+const PORT = 3005;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "views")));
 
@@ -21,25 +20,51 @@ app.get("/", (req, res) =>
 app.get("/api/config", (req, res) => res.json(config));
 
 // Create new project
-app.post("/api/project/create", (req, res) => {
+// app.post("/api/project/create", (req, res) => {
+//   const { machine, project, projectData } = req.body;
+//   if (!config.machines[machine])
+//     return res.status(400).json({ error: "Machine not found" });
+//   if (config.machines[machine].projects[project])
+//     return res.status(400).json({ error: "Project exists" });
+//   // Set defaults
+//   const pd = { ...projectData };
+//   pd.commands = pd.commands || [];
+//   pd.version = pd.version || "1.0.0";
+//   pd.https = !!pd.https;
+//   pd.repo = pd.repo || "";
+//   pd.autoClone = !!pd.autoClone;
+//   // Pangolin config
+//   pd.pangolin = pd.pangolin || {
+//     siteId: null,
+//     domainId: "",
+//     protocol: "http",
+//     port: 80,
+//     enable: false,
+//     subdomain: "",
+//   };
+//   config.machines[machine].projects[project] = pd;
+//   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+//   res.json({ success: true });
+// });
+
+app.post("/api/project/create", async (req, res) => {
   const { machine, project, projectData } = req.body;
   if (!config.machines[machine])
     return res.status(400).json({ error: "Machine not found" });
   if (config.machines[machine].projects[project])
     return res.status(400).json({ error: "Project exists" });
-  // Default fields
-  projectData.commands = projectData.commands || [];
-  projectData.version = projectData.version || "1.0.0";
-  projectData.https = projectData.https || false;
-  projectData.repo = projectData.repo || "";
-  projectData.autoClone = !!projectData.autoClone;
-  config.machines[machine].projects[project] = projectData;
+  // Set defaults
+  const pd = { ...projectData };
+  pd.commands = pd.commands || [];
+  pd.version = pd.version || "1.0.0";
+  pd.https = !!pd.https;
+  pd.repo = pd.repo || "";
+  pd.autoClone = !!pd.autoClone;
+  config.machines[machine].projects[project] = pd;
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
-  // Create directory if autoClone is enabled
-  
-
   res.json({ success: true });
+  ({ success: true });
 });
 
 // Update project
@@ -53,37 +78,21 @@ app.post("/api/project/update", (req, res) => {
 });
 
 // Deploy project
-app.post("/api/deploy", (req, res) => {
+app.post("/api/deploy", async (req, res) => {
   const { machine, project } = req.body;
-  const cmd = `node ../scripts/deploy.js ${machine} ${project}`;
-  exec(cmd, (err, stdout, stderr) => {
-    if (err) return res.status(500).send(stderr);
-    res.send(stdout);
-  });
-});
+  const cmd = `node ./scripts/deploy.js ${machine} ${project}`;
+  console.log("[+] Deploying", machine, project, cmd);
+  exec(cmd, async (err, stdout, stderr) => {
+    if (err) {
+      console.error("[!] Deploy error:", err);
+      return res.status(500).json({ error: "Deploy error" });
+    }
 
-// Pangolin endpoints
-app.get("/api/pangolin/domains", async (req, res) => {
-  try {
-    res.json(await pangolin.listDomains());
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-app.get("/api/pangolin/sites", async (req, res) => {
-  try {
-    res.json(await pangolin.listSites());
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-app.post("/api/pangolin/full-setup", async (req, res) => {
-  try {
-    const rs = await pangolin.fullSetup(req.body.resource, req.body.target);
-    res.json(rs);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+    console.log("[+] Deploy output:", stdout);
+    if (stderr) console.error(stderr);
+
+    res.json({ deploy: stdout });
+  });
 });
 
 app.listen(PORT, () =>
