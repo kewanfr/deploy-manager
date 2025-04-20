@@ -38,7 +38,10 @@ if (proj.autoClone && proj.repo) {
   execSync(cloneCmd, { stdio: "inherit" });
 }
 
-const sshBase = `ssh ${noHostAuthenticityCheck} -p ${machine.port} ${machine.user}@${machine.host}`;
+const identity = proj.sshKeyPath ? `-i ${proj.sshKeyPath}` : "";
+const sshBase = `ssh ${identity} -o StrictHostKeyChecking=no -p ${machine.port} ${machine.user}@${machine.host}`;
+
+// const sshBase = `ssh ${noHostAuthenticityCheck} -p ${machine.port} ${machine.user}@${machine.host}`;
 let cmd = `cd ${proj.path} && git pull`;
 if (proj.type === "docker") {
   cmd += " && docker compose down && docker compose up -d --build";
