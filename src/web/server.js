@@ -19,6 +19,8 @@ app.get("/", (req, res) =>
 // Get full config
 app.get("/api/config", (req, res) => res.json(config));
 
+app.set("trust proxy", true);
+
 // Create new project
 // app.post("/api/project/create", (req, res) => {
 //   const { machine, project, projectData } = req.body;
