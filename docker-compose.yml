@@ -14,4 +14,5 @@ services:
     command: sh -c "npm install && npm run start"
     environment:
       - NODE_ENV=production
+      - PORT=3000
     restart: unless-stopped
