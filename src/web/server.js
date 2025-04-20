@@ -7,7 +7,7 @@ const configPath = path.join(__dirname, "../config/machines.json");
 let config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
 const app = express();
-const PORT = 3005;
+const PORT = 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "views")));
 
