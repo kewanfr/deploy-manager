@@ -2,10 +2,11 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const configPath = path.join(__dirname, "../config/machines.json");
+
 const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
-const noHostAuthenticityCheck = "";
-// const noHostAuthenticityCheck = "-o StrictHostKeyChecking=no";
+// const noHostAuthenticityCheck = "";
+const noHostAuthenticityCheck = "-o StrictHostKeyChecking=no";
 
 const [, , target, project] = process.argv;
 if (!target || !project) {

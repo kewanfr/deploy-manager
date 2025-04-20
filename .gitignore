@@ -6,3 +6,4 @@ old/
 .vscode
 
 config/machines.json
+src/config/machines.json

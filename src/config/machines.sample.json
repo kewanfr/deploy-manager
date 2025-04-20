@@ -1,0 +1,46 @@
+{
+  "machines": {
+    "vm1": {
+      "host": "vm1.prive",
+      "user": "root",
+      "port": 22,
+      "projects": {}
+    },
+    "vm2": {
+      "host": "vm2.prive",
+      "user": "root",
+      "port": 22,
+      "projects": {}
+    },
+    "vm4": {
+      "host": "vm4.prive",
+      "user": "root",
+      "port": 22,
+      "projects": {}
+    },
+    "rpi": {
+      "host": "rpi.prive",
+      "user": "root",
+      "port": 22,
+      "projects": {}
+    },
+    "llrpi": {
+      "host": "llrpi.prive",
+      "user": "root",
+      "port": 22,
+      "projects": {}
+    },
+    "pve": {
+      "host": "pve.prive",
+      "user": "root",
+      "port": 22,
+      "projects": {}
+    },
+    "vps": {
+      "host": "node",
+      "user": "root",
+      "port": 22,
+      "projects": {}
+    }
+  }
+}
