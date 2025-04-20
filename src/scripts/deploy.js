@@ -26,20 +26,21 @@ if (!proj) {
 
 console.log(`Deploying project '${project}' on machine '${target}'...`);
 
+
+const identity = proj.sshKeyPath ? `-i ${proj.sshKeyPath}` : "";
+const sshBase = `ssh ${identity} -o StrictHostKeyChecking=no -p ${machine.port} ${machine.user}@${machine.host}`;
 // If autoClone and first deploy, clone repo if path doesn't exist
 if (proj.autoClone && proj.repo) {
   const pathBeforeProject = proj.path.split("/").slice(0, -1).join("/");
-  const createDirCmd = `ssh ${noHostAuthenticityCheck} -p ${machine.port} ${machine.user}@${machine.host} 'mkdir -p ${pathBeforeProject}'`;
+  const createDirCmd = `${sshBase} 'mkdir -p ${pathBeforeProject}'`;
   console.log("[+] Creating directory...");
   execSync(createDirCmd, { stdio: "inherit" });
   // Check if directory exists
-  const cloneCmd = `ssh ${noHostAuthenticityCheck} -p ${machine.port} ${machine.user}@${machine.host} 'if [ ! -d "${proj.path}" ]; then git clone ${proj.repo} ${proj.path}; fi'`;
+  const cloneCmd = `${sshBase} 'if [ ! -d "${proj.path}" ]; then git clone ${proj.repo} ${proj.path}; fi'`;
   console.log("[+] Checking/cloning repo...");
   execSync(cloneCmd, { stdio: "inherit" });
 }
 
-const identity = proj.sshKeyPath ? `-i ${proj.sshKeyPath}` : "";
-const sshBase = `ssh ${identity} -o StrictHostKeyChecking=no -p ${machine.port} ${machine.user}@${machine.host}`;
 
 // const sshBase = `ssh ${noHostAuthenticityCheck} -p ${machine.port} ${machine.user}@${machine.host}`;
 let cmd = `cd ${proj.path} && git pull`;
