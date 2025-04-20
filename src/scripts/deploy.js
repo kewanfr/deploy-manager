@@ -41,7 +41,7 @@ if (proj.autoClone && proj.repo) {
 const sshBase = `ssh ${noHostAuthenticityCheck} -p ${machine.port} ${machine.user}@${machine.host}`;
 let cmd = `cd ${proj.path} && git pull`;
 if (proj.type === "docker") {
-  cmd += " && docker compose up -d --build";
+  cmd += " && docker compose down && docker compose up -d --build";
 } else {
   if (proj.commands && proj.commands.length) {
     cmd += " && " + proj.commands.join(" && ");

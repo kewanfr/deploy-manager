@@ -22,6 +22,34 @@ app.get("/api/config", (req, res) => res.json(config));
 
 app.set("trust proxy", true);
 
+app.set("trust proxy", "loopback"); // 127.0.0.1 seulement
+app.set("trust proxy", "uniquelocal"); // 127.0.0.1 + 192.168.x.x
+app.set("trust proxy", "172.18.0.0/16"); // réseau docker bridge
+app.set("trust proxy", 1); // 1 proxy devant (classique)
+
+app.set("trust proxy", true); // déjà ajouté
+
+app.use((req, res, next) => {
+  console.log("--- NOUVELLE REQUÊTE ---");
+  console.log("IP :", req.ip);
+  console.log("X-Forwarded-For :", req.headers["x-forwarded-for"]);
+  console.log("Protocole :", req.protocol);
+  console.log("Host :", req.headers.host);
+  console.log("Path :", req.path);
+  next();
+});
+
+app.get("/debug", (req, res) => {
+  res.json({
+    ip: req.ip,
+    forwardedFor: req.headers["x-forwarded-for"],
+    protocol: req.protocol,
+    host: req.headers.host,
+    secure: req.secure,
+  });
+});
+
+
 // Create new project
 // app.post("/api/project/create", (req, res) => {
 //   const { machine, project, projectData } = req.body;
