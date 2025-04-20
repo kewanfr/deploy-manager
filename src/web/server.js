@@ -7,6 +7,7 @@ const configPath = path.join(__dirname, "../config/machines.json");
 let config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
 const app = express();
+const HOST = "0.0.0.0";
 const PORT = 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "views")));
@@ -97,6 +98,6 @@ app.post("/api/deploy", async (req, res) => {
   });
 });
 
-app.listen(PORT, () =>
+app.listen(PORT, HOST, () =>
   console.log(`Server running at http://localhost:${PORT}`)
 );
