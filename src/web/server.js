@@ -4,10 +4,21 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const { exec } = require("child_process");
 const configPath = path.join(__dirname, "../config/machines.json");
+
+if (
+  !fs.existsSync(configPath) &&
+  fs.existsSync(path.join(__dirname, "../config/machines.example.json"))
+) {
+  fs.copyFileSync(
+    path.join(__dirname, "../config/machines.example.json"),
+    configPath
+  );
+}
+
 let config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
 const app = express();
-const HOST = "192.168.0.151";
+const HOST = process.env.HOST || "0.0.0.0";
 const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "views")));
