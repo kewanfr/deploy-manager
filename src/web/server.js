@@ -137,6 +137,6 @@ app.post("/api/deploy", async (req, res) => {
   });
 });
 
-app.listen(PORT, HOST, () =>
+app.listen(PORT, () =>
   console.log(`Server running at http://${HOST}:${PORT}`)
 );
