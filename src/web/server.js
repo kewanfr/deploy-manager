@@ -22,12 +22,12 @@ app.get("/api/config", (req, res) => res.json(config));
 
 app.set("trust proxy", true);
 
-app.set("trust proxy", "loopback"); // 127.0.0.1 seulement
-app.set("trust proxy", "uniquelocal"); // 127.0.0.1 + 192.168.x.x
-app.set("trust proxy", "172.18.0.0/16"); // réseau docker bridge
+// app.set("trust proxy", "loopback"); // 127.0.0.1 seulement
+// app.set("trust proxy", "uniquelocal"); // 127.0.0.1 + 192.168.x.x
+// app.set("trust proxy", "172.18.0.0/16"); // réseau docker bridge
 app.set("trust proxy", 1); // 1 proxy devant (classique)
 
-app.set("trust proxy", true); // déjà ajouté
+// app.set("trust proxy", true); // déjà ajouté
 
 app.use((req, res, next) => {
   console.log("--- NOUVELLE REQUÊTE ---");
