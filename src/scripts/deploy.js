@@ -28,7 +28,7 @@ console.log(`Deploying project '${project}' on machine '${target}'...`);
 
 
 const identity = proj.sshKeyPath ? `-i ${proj.sshKeyPath}` : "";
-console.log(`proj: ${proj}`);
+console.log(`proj: ${JSON.stringify(proj, null, 2)}`);
 const sshBase = `ssh ${identity} -o StrictHostKeyChecking=no -p ${machine.port} ${machine.user}@${machine.host}`;
 // If autoClone and first deploy, clone repo if path doesn't exist
 if (proj.autoClone && proj.repo) {
