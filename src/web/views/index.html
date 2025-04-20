@@ -29,6 +29,11 @@
         </select>
         <label>Commandes (une par ligne):</label>
         <textarea id="cf-commands" rows="3"></textarea>
+        <label>Fichiers init (nom|contenu, une ligne par fichier) :</label>
+        <textarea id="cf-initfiles" rows="3"
+          placeholder="pass.php|<?php echo 'ok'; ?>"
+        ></textarea>
+
         <label>Version:</label>
         <input id="cf-version" value="1.0.0" />
         <label>HTTPS:</label>
@@ -107,6 +112,13 @@
         );
         const ul = document.createElement("ul");
         ul.style.listStyle = "none";
+
+        const back = document.createElement('li');
+        back.textContent = '← Retour';
+        back.onclick = loadConfig;
+        ul.parentNode.insertBefore(back, ul);
+
+
         Object.keys(config.machines[machine].projects).forEach((p) => {
           const li = document.createElement("li");
           li.textContent = p;
@@ -160,6 +172,14 @@
           https: document.getElementById("cf-https").value === "true",
           repo: document.getElementById("cf-repo").value.trim(),
           autoClone: document.getElementById("cf-autoClone").checked,
+          initFiles: document.getElementById('cf-initfiles').value
+            .split(/\r?\n/)
+            .filter(Boolean)
+            .map(line => {
+              const [filename, content] = line.split('|');
+              return { filename: filename.trim(), content: content.trim() };
+            })
+
           
         };
         const res = await fetch("/api/project/create", {

@@ -105,6 +105,18 @@ app.post("/api/project/create", async (req, res) => {
   config.machines[machine].projects[project] = pd;
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
+  const { execSync } = require("child_process");
+  const sshBase = `ssh -p ${machine.port} ${machine.user}@${machine.host}`;
+  (projectData.initFiles || []).forEach((f) => {
+    const remote = `${machineConfig.path}/${f.filename}`;
+    const escaped = f.content.replace(/'/g, "'\\''");
+    console.log("[InitFile] Creating", f.filename);
+    execSync(`${sshBase} "echo '${escaped}' > ${remote}"`, {
+      stdio: "inherit",
+    });
+  });
+
+
   res.json({ success: true });
   ({ success: true });
 });
