@@ -3,6 +3,8 @@ const fs = require("fs");
 const path = require("path");
 const configPath = path.join(__dirname, "../config/machines.json");
 
+console.log("Config path:", configPath);
+
 const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
 // const noHostAuthenticityCheck = "";
