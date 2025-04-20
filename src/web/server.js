@@ -7,7 +7,7 @@ const configPath = path.join(__dirname, "../config/machines.json");
 let config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
 const app = express();
-const HOST = "0.0.0.0";
+const HOST = "192.168.0.151";
 const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "views")));
