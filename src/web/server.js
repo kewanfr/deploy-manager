@@ -19,7 +19,7 @@ let config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 
 const app = express();
 const HOST = process.env.HOST || "0.0.0.0";
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 60534;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "views")));
 
